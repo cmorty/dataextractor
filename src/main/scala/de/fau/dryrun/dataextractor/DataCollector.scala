@@ -48,6 +48,7 @@ object DataCollector {
 		var startDate:Date = null
 		var endDate:Date = null
 		var dryRun = false
+		var ignoreFile:File = null
 		val parser = new OptionParser("scopt") {
 		  arg("<infolder>", "<infolder> input file", { v: String => infolder = v })
 		  argOpt("[<outfile>]", "<outfile> output file", { v: String => outfile = v })
@@ -78,13 +79,15 @@ object DataCollector {
 		DEuip1_rcv.loadmap(backupfile)
 		
 
+		val ignorelist = {if(ignoreFile == null) List[String]() else Source.fromFile(ignoreFile).getLines.toList}
+		
 		log.trace("BV: " +  folder.listFiles.size) 
 		log.trace("AV: " + folder.listFiles.filter({x => !(ignorelist.contains(x.getName))}).size)
 		
 		
 		// Using par here does not improve performance		
 		//val experiments = folder.listFiles.filter(_.isDirectory).par.map(new Experiment(_))
-		val experiments = folder.listFiles.filter(_.isDirectory).map(new Experiment(_))		
+		val experiments = folder.listFiles.view.filter({x => !(ignorelist.contains(x.getName))}).filter(_.isDirectory).map(new Experiment(_)).toArray		
 		
 		DEuip1_rcv.savemap(backupfile)
 		
@@ -139,7 +142,7 @@ object DataCollector {
 		;{
 
 			val header = configs ::: List(nodeStr, "key", "value")
-			val oLines = for(exp <- experiments) yield{
+			val oLines = for(exp <- selexp) yield{
 				val pres = configs.map(exp.config.getOrElse(_, "null")).mkString("", sep, sep)
 				for(res <- exp.results) yield {
 					pres + res.stackList.mkString(sep)
@@ -159,7 +162,7 @@ object DataCollector {
 		log.info("Wrinting stacked expriment results");
 		;{
 			val header = configs ::: List("key", "value")
-			val oLines = for(exp <- experiments) yield {
+			val oLines = for(exp <- selexp) yield {
 				val pres = configs.map(exp.config.getOrElse(_, "null")).mkString("", sep, sep)
 				val rv = for(res <- exp.expResults) yield {
 					pres + res.stackList.mkString(sep)
@@ -180,7 +183,7 @@ object DataCollector {
 		log.info("Wrinting unstacked results");
 		;{
 			val header =  configs ::: List(nodeStr) ::: resKeys
-			val olines = for(exp <- experiments ; (node, dat) <- exp.resultsNodeKeyValueMap) yield {
+			val olines = for(exp <- selexp ; (node, dat) <- exp.resultsNodeKeyValueMap) yield {
 					val rv:List[String] = configs.map(exp.config.getOrElse(_, "null")) ::: 
 							List(node.toString)	:::
 							resKeys.map(dat.getOrElse(_, "null").toString)
@@ -205,7 +208,7 @@ object DataCollector {
 		log.info("Wrinting unstacked Experiment results");
 		;{
 			val header =  configs ::: expResKeys
-			val olines = for(exp <- experiments ) yield {
+			val olines = for(exp <- selexp ) yield {
 					val dat = exp.expResultsKeyValueMap
 					val rv = configs.map(exp.config.getOrElse(_, "null")) ::: 
 							expResKeys.map(dat.getOrElse(_, "null"))
