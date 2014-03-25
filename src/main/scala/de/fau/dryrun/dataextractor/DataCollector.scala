@@ -73,8 +73,10 @@ object DataCollector {
 		
 		
 		val folder = new File(infolder)
-				
+		val backupfile = new File(folder + "/" + "idmap.back")
 		log.info("Reading: " + folder)
+		DEuip1_rcv.loadmap(backupfile)
+		
 
 		log.trace("BV: " +  folder.listFiles.size) 
 		log.trace("AV: " + folder.listFiles.filter({x => !(ignorelist.contains(x.getName))}).size)
@@ -84,6 +86,7 @@ object DataCollector {
 		//val experiments = folder.listFiles.filter(_.isDirectory).par.map(new Experiment(_))
 		val experiments = folder.listFiles.filter(_.isDirectory).map(new Experiment(_))		
 		
+		DEuip1_rcv.savemap(backupfile)
 		
 		log.info("Tatal Experiments: " + experiments.size)
 		log.info("Total Data: " + experiments.map(_.data.size).sum)
