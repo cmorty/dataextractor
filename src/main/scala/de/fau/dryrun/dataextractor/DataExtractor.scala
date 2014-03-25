@@ -155,7 +155,9 @@ class Experiment(dir: File) {
 			Unit => {new DEuip1 with DEuipSim1},
 			Unit => {new DEuip1_rcv},
 			Unit => {new DEuip1_rcv with DEuipSim1 with DEuip1_rcvSim}, 
-			Unit => {new DEsizes}
+			Unit => {new DEsizes},
+			Unit => {new DEboot},
+			Unit => {new DEboot with DEbootSim}
 	)
 	
 	val config = Source.fromFile(dir.toString +"/conf.txt").getLines.map(_.split("=", 2)).map(e => e(0) -> e(1)).toMap		
