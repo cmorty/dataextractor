@@ -41,6 +41,7 @@ class DEuip1 extends DataExtractor {
 			return(false -> Vector[Result]())
 		}
 		
+		
 		true -> k.toVector.zip(vInt.get).map(x => {new Result(id, x._1, x._2)})
 	}
 	
@@ -52,12 +53,7 @@ class DEuip1 extends DataExtractor {
 		if(file.getName.equals(filename)){
 			//log.debug("New Parallel")
 			new Parallel() {
-				
-				var eg = false
-				var us = false
-				var rs = false
-				
-				override def ok =  eg && us && rs
+
 				override def parse(line:String):Vector[Data]  = {
 					//log.debug("Parsing " + line)
 					val s = line.split(" ", 3)
@@ -66,13 +62,13 @@ class DEuip1 extends DataExtractor {
 					} else extract(s(0)) match {
 						case None => Vector[Data]()
 						case Some(id) => {
-							//log.debug("data:  -" + data + "-")
+							//log.trace("data:  -" + line + "-")
 							
 							s(1) match {
-								case "RS:" => val(a, b) = zipToRes(id, rst, s(2)); if(a) rs = true; b
-								case "US:" => val(a, b) = zipToRes(id, ust, s(2)); if(a) us = true; b
-								case "EG" => val(a, b) = zipToRes(id, egt, s(2)); if(a) eg = true;  b
-								case "EG:" => val(a, b) = zipToRes(id, egt, s(2)); if(a) eg = true;  b
+								case "RS:" => zipToRes(id, rst, s(2))._2
+								case "US:" => zipToRes(id, ust, s(2))._2
+								case "EG" => zipToRes(id, egt, s(2))._2
+								case "EG:" => zipToRes(id, egt, s(2))._2
 								case _ => Vector[Data]()
 							}
 							
