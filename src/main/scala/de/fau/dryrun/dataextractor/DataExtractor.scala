@@ -100,7 +100,7 @@ abstract class DataExtractor {
 object DataExtractor{
 	import scala.language.implicitConversions
 	
-	val log = LoggerFactory.getLogger(this.getClass)
+	private[this] val log = LoggerFactory.getLogger(this.getClass)
 	val listMap: collection.concurrent.Map[java.io.File, Array[java.io.File]] = new java.util.concurrent.ConcurrentHashMap[java.io.File,Array[java.io.File]]
 	def getDirList(dir:java.io.File) = {
 		listMap.getOrElseUpdate(dir, dir.listFiles)
@@ -133,7 +133,7 @@ object DataExtractor{
 			return Some(sp.last.hex)
 		} 
 		
-		//log.info("Not urn, but -"  + id + "-" )
+		log.trace("Not urn, but \""  + id + "\"" )
 		None
 	}
 	
@@ -147,6 +147,7 @@ class Experiment(dir: File) {
 	val log = LoggerFactory.getLogger(this.getClass)
 	//log.debug("Parsing " + dir)
 	 
+	log.trace("\nExperiment: " + dir)
 	
 	
 	val extractors:List[Unit => DataExtractor] = List(
@@ -159,6 +160,8 @@ class Experiment(dir: File) {
 	
 	val config = Source.fromFile(dir.toString +"/conf.txt").getLines.map(_.split("=", 2)).map(e => e(0) -> e(1)).toMap		
 	
+	log.trace("\nExperiment: " + dir + " -> " + config.map({x => x._1 + ": " + x._2}).mkString(", "))
+	
 	//Handle dir with every extractor
 	val data = extractors.par.aggregate(Vector[Data]())(_ ++ _().extractDir(dir), _ ++ _)
 	
@@ -170,6 +173,7 @@ class Experiment(dir: File) {
 				if(s.after(ts)) s = ts
 				if(e.before(ts)) e = ts
 			} 
+			case None => 
 		}
 		s -> e
 	})
@@ -193,6 +197,6 @@ class Experiment(dir: File) {
 	val expResults:Vector[ExpResult] =  data.view.filter(_.isInstanceOf[ExpResult]).map(_.asInstanceOf[ExpResult]).toVector
 	val expResultsKeyValueMap = expResults.map(x =>  {x.k -> x.v}).toMap
 		
-	
+	log.trace("Results: "  + results.size + " ExpResults " + expResults.size)
 	//def snapshots =  data.filter(_.isInstanceOf[Snapshot]).map(_.asInstanceOf[Snapshot])
 }
