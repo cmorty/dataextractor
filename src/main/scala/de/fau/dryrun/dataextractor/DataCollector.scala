@@ -12,6 +12,7 @@ import scopt.mutable.OptionParser
 import scopt.mutable.OptionParser._
 import java.text.SimpleDateFormat
 import java.util.Date
+import org.apache.log4j.Level
 
 
 
@@ -53,6 +54,14 @@ object DataCollector {
 		  opt("s","start", "When to start collecting data in yyyy-MM-ddTHH:mm:ss",  {v: String => startDate = dp.parse(v)})
 		  opt("e", "end", "When to stop collecting data in yyyy-MM-ddTHH:mm:ss",  {v: String => endDate = dp.parse(v)})
 		  opt("n", "dryrun", "Dont write to file", {dryRun = true} )
+		  opt("l","loglevel", "Loglevel (off, fatel, error, warn, info, debug ,trace)", {
+		  	v:String => {
+		  		val lv = Level.toLevel(v)
+		  		log.info("Setting loglevel to " + lv.toString())
+		  		Logger.getRootLogger.setLevel(lv)
+		  	}
+		  })
+		  opt("i", "ignore", "File of experiments to ignore - one per Line", {v:String => ignoreFile = new File(v) })
 		  help("h", "help", "prints this usage text")
 		  
 		  // arglist("<file>...", "arglist allows variable number of arguments",
@@ -67,6 +76,10 @@ object DataCollector {
 				
 		log.info("Reading: " + folder)
 
+		log.trace("BV: " +  folder.listFiles.size) 
+		log.trace("AV: " + folder.listFiles.filter({x => !(ignorelist.contains(x.getName))}).size)
+		
+		
 		// Using par here does not improve performance		
 		//val experiments = folder.listFiles.filter(_.isDirectory).par.map(new Experiment(_))
 		val experiments = folder.listFiles.filter(_.isDirectory).map(new Experiment(_))		
