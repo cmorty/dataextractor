@@ -76,7 +76,7 @@ object DataCollector {
 		val folder = new File(infolder)
 		val backupfile = new File(folder + "/" + "idmap.back")
 		log.info("Reading: " + folder)
-		DEuip1_rcv.loadmap(backupfile)
+		DEexp_udp.loadmap(backupfile)
 		
 
 		val ignorelist = {if(ignoreFile == null) List[String]() else Source.fromFile(ignoreFile).getLines.toList}
@@ -89,7 +89,7 @@ object DataCollector {
 		//val experiments = folder.listFiles.filter(_.isDirectory).par.map(new Experiment(_))
 		val experiments = folder.listFiles.view.filter({x => !(ignorelist.contains(x.getName))}).filter(_.isDirectory).map(new Experiment(_)).toArray		
 		
-		DEuip1_rcv.savemap(backupfile)
+		DEexp_udp.savemap(backupfile)
 		
 		log.info("Tatal Experiments: " + experiments.size)
 		log.info("Total Data: " + experiments.map(_.data.size).sum)
@@ -136,49 +136,49 @@ object DataCollector {
 		val outname = {if(outfile.length > 1) outfile else folder.toString}
 		
 		
-		
-		//Stacked results
-		log.info("Wrinting stacked results");
-		;{
-
-			val header = configs ::: List(nodeStr, "key", "value")
-			val oLines = for(exp <- selexp) yield{
-				val pres = configs.map(exp.config.getOrElse(_, "null")).mkString("", sep, sep)
-				for(res <- exp.results) yield {
-					pres + res.stackList.mkString(sep)
+		if(false) {
+			//Stacked results
+			log.info("Wrinting stacked results");
+			;{
+	
+				val header = configs ::: List(nodeStr, "key", "value")
+				val oLines = for(exp <- selexp) yield{
+					val pres = configs.map(exp.config.getOrElse(_, "null")).mkString("", sep, sep)
+					for(res <- exp.results) yield {
+						pres + res.stackList.mkString(sep)
+					}
+				}
+				if(oLines.size > 0) {
+					val outfile = new java.io.PrintWriter(new File(outname + ".res.stacked"))
+					outfile.println(header.mkString(sep)) 
+					outfile.println(oLines.view.flatten.mkString("\n"))
+					outfile.close
+				} else {
+					log.info("No Stacked results")
 				}
 			}
-			if(oLines.size > 0) {
-				val outfile = new java.io.PrintWriter(new File(outname + ".res.stacked"))
-				outfile.println(header.mkString(sep)) 
-				outfile.println(oLines.view.flatten.mkString("\n"))
-				outfile.close
-			} else {
-				log.info("No Stacked results")
-			}
-		}
-		
-		//Stacked experiment results
-		log.info("Wrinting stacked expriment results");
-		;{
-			val header = configs ::: List("key", "value")
-			val oLines = for(exp <- selexp) yield {
-				val pres = configs.map(exp.config.getOrElse(_, "null")).mkString("", sep, sep)
-				val rv = for(res <- exp.expResults) yield {
-					pres + res.stackList.mkString(sep)
+			
+			//Stacked experiment results
+			log.info("Wrinting stacked expriment results");
+			;{
+				val header = configs ::: List("key", "value")
+				val oLines = for(exp <- selexp) yield {
+					val pres = configs.map(exp.config.getOrElse(_, "null")).mkString("", sep, sep)
+					val rv = for(res <- exp.expResults) yield {
+						pres + res.stackList.mkString(sep)
+					}
+					rv
 				}
-				rv
-			}
-			if(oLines.size > 0) {
-				val outfile = new java.io.PrintWriter(new File(outname + ".res.exp_stacked"))
-				outfile.println(header.mkString(sep))
-				outfile.println(oLines.view.flatten.mkString("\n"))
-				outfile.close
-			}else {
-				log.info("No Stacked experiment results")
+				if(oLines.size > 0) {
+					val outfile = new java.io.PrintWriter(new File(outname + ".res.exp_stacked"))
+					outfile.println(header.mkString(sep))
+					outfile.println(oLines.view.flatten.mkString("\n"))
+					outfile.close
+				}else {
+					log.info("No Stacked experiment results")
+				}
 			}
 		}
-		
 		//Unstacked results
 		log.info("Wrinting unstacked results");
 		;{

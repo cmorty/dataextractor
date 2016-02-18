@@ -56,25 +56,30 @@ class DEuip1 extends DataExtractor {
 
 				override def parse(line:String):Vector[Data]  = {
 					//log.debug("Parsing " + line)
-					val s = line.split(" ", 3)
-					if(s.size == 2) {
-						Vector[Data]()	
-					} else extract(s(0)) match {
-						case None => Vector[Data]()
-						case Some(id) => {
-							//log.trace("data:  -" + line + "-")
-							
-							s(1) match {
-								case "RS:" => zipToRes(id, rst, s(2))._2
-								case "US:" => zipToRes(id, ust, s(2))._2
-								case "EG" => zipToRes(id, egt, s(2))._2
-								case "EG:" => zipToRes(id, egt, s(2))._2
-								case _ => Vector[Data]()
+					try {
+						val s = line.split(" ", 3)
+						if(s.size == 2) {
+							Vector[Data]()	
+						} else extract(s(0)) match {
+							case None => Vector[Data]()
+							case Some(id) => {
+								//log.trace("data:  -" + line + "-")
+								
+								s(1) match {
+									case "RS:" => zipToRes(id, rst, s(2))._2
+									case "US:" => zipToRes(id, ust, s(2))._2
+									case "EG" => zipToRes(id, egt, s(2))._2
+									case "EG:" => zipToRes(id, egt, s(2))._2
+									case _ => Vector[Data]()
+								}
+								
 							}
-							
 						}
+					} catch {
+						case x:Exception => 
+							println("Failed to parse: " + line)
+							throw x
 					}
-					
 				}
 			}
 		}

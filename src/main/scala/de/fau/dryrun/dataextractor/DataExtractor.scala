@@ -153,8 +153,8 @@ class Experiment(dir: File) {
 	val extractors:List[Unit => DataExtractor] = List(
 			Unit => {new DEuip1},
 			Unit => {new DEuip1 with DEuipSim1},
-			Unit => {new DEuip1_rcv},
-			Unit => {new DEuip1_rcv with DEuipSim1 with DEuip1_rcvSim}, 
+			Unit => {new DEexp_udp},
+			Unit => {new DEexp_udp with DEuipSim1 with DEexp_udpSim}, 
 			Unit => {new DEsizes},
 			Unit => {new DEboot},
 			Unit => {new DEboot with DEbootSim}

@@ -34,20 +34,26 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
 	<build>
 		<pluginManagement>
 			<plugins>
-				<plugin>
-					<groupId>net.alchim31.maven</groupId>
-					<artifactId>scala-maven-plugin</artifactId>
-					<version>3.1.5</version>
-					<configuration>
-						<recompileMode>incremental</recompileMode>
-						<scalaVersion>2.10.2</scalaVersion>
-						<args>
-						  <arg>-unchecked</arg>
-						  <arg>-deprecation</arg>
-						  <arg>-feature</arg>
-						</args>
-					</configuration>
-				</plugin>
+			<plugin>
+				<groupId>net.alchim31.maven</groupId>
+				<artifactId>scala-maven-plugin</artifactId>
+				<version>3.1.6</version>
+				<executions>
+					<execution>
+						<id>compile</id>
+						<goals>
+							<goal>compile</goal>
+						</goals>
+						<phase>compile</phase>
+					</execution>
+				</executions>
+				<configuration>
+					<scalaVersion>2.10.3</scalaVersion>
+					<recompileMode>incremental</recompileMode>
+					<useZincServer>true</useZincServer>
+				</configuration>
+
+			</plugin>
 
 			</plugins>
 		</pluginManagement>
